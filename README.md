@@ -153,7 +153,7 @@ pixi run cargo run --release --bin convert-file -- C:\Users\User\scratch\pre\rel
 
 # Setup Code to run in Google Colab
 ```bash
-!wget https://raw.githubusercontent.com/hackdeploy/relational-transformer/dev/scripts/setup_colab.py
+!wget https://raw.githubusercontent.com/hackdeploy/relational-transformer/refs/heads/dev/scripts/setup_colab.py
 !python setup_colab.py
 ```
 
