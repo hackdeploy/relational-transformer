@@ -44,15 +44,6 @@ def main():
 
     # 5. Build and install the Rust extension (with Google Drive caching)
     print("Setting up Rust Extension with Drive Caching...")
-    
-    try:
-        from google.colab import drive
-        if not os.path.exists("/content/drive"):
-            drive.mount('/content/drive')
-    except ImportError:
-        print("Warning: google.colab module not found. Skipping Google Drive mount.")
-        # We continue anyway, hoping the path exists or the user handles it
-    
     drive_wheels_dir = "/content/drive/MyDrive/Colab_Data/relational-transformer-wheels"
     run_command(f"mkdir -p '{drive_wheels_dir}'")
 
