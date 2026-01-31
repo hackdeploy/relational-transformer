@@ -1,16 +1,5 @@
 # Relational Transformer
 
-# Fixes for Windows
-```bash
-Remove-Item -Path C:\Users\User\scratch\relbench -Force
-
-New-Item -ItemType SymbolicLink -Path C:\Users\User\scratch\relbench -Target C:\Users\User\AppData\Local\relbench\relbench\Cache
-
-
-pixi run cargo run --release --bin convert-file -- C:\Users\User\scratch\pre\rel-f1\nodes.rkyv C:\Users\User\scratch\pre\rel-f1\out_nodes.json
-```
-
-
 This repository provides a reference implementation
 of the Relational Transformer architecture
 from the paper: [Relational Transformer: Toward Zero-Shot Foundation Models for Relational Data](https://arxiv.org/abs/2510.06377).
@@ -150,6 +139,73 @@ on `rel-amazon/user-churn` task only
 (takes about 1.5 hours on 8xA100 GPUs):
 ```bash
 pixi run torchrun --standalone --nproc_per_node=8 scripts/example_finetune.py
+```
+
+# Fixes for Windows
+```bash
+Remove-Item -Path C:\Users\User\scratch\relbench -Force
+
+New-Item -ItemType SymbolicLink -Path C:\Users\User\scratch\relbench -Target C:\Users\User\AppData\Local\relbench\relbench\Cache
+
+
+pixi run cargo run --release --bin convert-file -- C:\Users\User\scratch\pre\rel-f1\nodes.rkyv C:\Users\User\scratch\pre\rel-f1\out_nodes.json
+```
+
+# Setup Code to run in Google Colab
+```bash
+!wget https://raw.githubusercontent.com/hackdeploy/relational-transformer/dev/scripts/setup_colab.py
+!python setup_colab.py
+```
+
+
+# Instructions to run in Google Colab
+```bash
+
+from google.colab import drive
+import os
+
+# 1. Mount Google Drive
+drive.mount('/content/drive')
+
+!curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+
+# Set environment path for rusth
+import os
+os.environ['PATH'] += ":/root/.cargo/bin"
+
+#clone the Repo
+!git clone -b dev https://github.com/hackdeploy/relational-transformer.git
+%cd relational-transformer
+
+#3. Patch Cargo.toml to support Colab's Python version 
+import sys
+python_version = f"abi3-py{sys.version_info.major}{sys.version_info.minor}"
+!sed -i 's/abi3-py312/extension-module/g' rustler/Cargo.toml
+
+# Install Required Packages
+!pip install maturin maturin-import-hook uv
+!pip install torch sentence_transformers wandb einops polars relbench google-cloud-bigquery
+
+
+# Build and install the Rust extension (with Google Drive caching)
+import glob
+
+drive_wheels_dir = "/content/drive/MyDrive/Colab_Data/relational-transformer-wheels"
+!mkdir -p "$drive_wheels_dir"
+
+%cd rustler
+cached_wheels = glob.glob(f"{drive_wheels_dir}/*.whl")
+if cached_wheels:
+    print(f"Found cached wheel: {cached_wheels[0]}")
+    !pip install "{cached_wheels[0]}"
+else:
+    print("Building Rust extension...")
+    !maturin build --release
+    !pip install target/wheels/*.whl
+    !cp target/wheels/*.whl "$drive_wheels_dir/"
+%cd ..
+
+print("Setup complete! You can now import rt.")
 ```
 
 
