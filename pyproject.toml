@@ -19,6 +19,7 @@ wandb = "*"
 einops = "*"
 strictfire = "*"
 maturin = { version = "*", "env-markers" = "sys_platform != 'linux'" }
+maturin-import-hook = "*"
 ml_dtypes = "*"
 orjson = "*"
 ipykernel = "*"
