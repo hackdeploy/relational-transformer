@@ -212,7 +212,18 @@ else:
 print("Setup complete! You can now import rt.")
 ```
 
+# Compiling Rustler in Windows to run in Colab using WSL
+```bash
+wsl --list
 
+wsl
+# Your Windows C: drive is mounted at /mnt/c/
+cd /mnt/c/Users/User/source/repos/relational-transformer/rustler
+
+# Build the wheel for Linux
+maturin build --release
+
+```
 
 ## Citation
 
