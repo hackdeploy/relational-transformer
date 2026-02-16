@@ -97,7 +97,7 @@ def _make_block_mask(mask, batch_size, seq_len, device):
         Q_LEN=seq_len,
         KV_LEN=seq_len,
         device=device,
-        _compile=True,
+        _compile=False,
     )
 
 
