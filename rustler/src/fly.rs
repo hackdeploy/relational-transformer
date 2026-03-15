@@ -255,7 +255,9 @@ impl Sampler {
         let mut datasets = Vec::new();
         let mut items = Vec::new();
         for (i, (db_name, node_idx_offset, num_nodes)) in dataset_tuples.into_iter().enumerate() {
-            let pre_path = format!("{}/scratch/pre/{}", var("HOME").unwrap(), db_name);
+            // Use USERPROFILE on Windows, HOME on Unix
+            let home = var("USERPROFILE").or_else(|_| var("HOME")).unwrap();
+            let pre_path = format!("{}/scratch/pre/{}", home, db_name);
             let nodes_path = format!("{}/nodes.rkyv", pre_path);
             let file = fs::File::open(&nodes_path).unwrap();
             let mmap = unsafe { Mmap::map(&file).unwrap() };
