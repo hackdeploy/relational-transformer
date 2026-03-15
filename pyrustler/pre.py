@@ -5,6 +5,9 @@ serialises everything to disk in a Python-native format (pickle + JSON).
 Pure-Python port of rustler/src/pre.rs.
 
 Usage:
+    pixi run python -m pyrustler.pre rel-f1
+    pixi run python -m pyrustler.pre rel-amazon --skip-db
+    
     python -m pyrustler.pre rel-f1
     python -m pyrustler.pre rel-amazon --skip-db
 """

@@ -34,3 +34,8 @@ rust = "*"
 pygraphviz = "*"
 uv = "*"
 
+[tool.pixi.tasks]
+pre = { cmd = "python -m pyrustler.pre", description = "Preprocess a relbench dataset. Usage: pixi run pre rel-f1" }
+fly = { cmd = "python -m pyrustler.fly", description = "Benchmark the sampler. Usage: pixi run fly rel-f1" }
+convert = { cmd = "python -m pyrustler.convert_file", description = "Convert pickle files to JSON. Usage: pixi run convert ~/scratch/pre/rel-f1" }
+
