@@ -1,8 +1,3 @@
-import maturin_import_hook
-from maturin_import_hook.settings import MaturinSettings
-
-maturin_import_hook.install(settings=MaturinSettings(release=True, uv=True))
-
 import json
 import os
 from functools import cache
@@ -10,8 +5,17 @@ from functools import cache
 import ml_dtypes
 import numpy as np
 import torch
-from rustler import Sampler
 from torch.utils.data import Dataset
+
+# Prefer the pure-Python pyrustler; fall back to the Rust extension if available.
+try:
+    from pyrustler import Sampler
+except ImportError:
+    import maturin_import_hook
+    from maturin_import_hook.settings import MaturinSettings
+
+    maturin_import_hook.install(settings=MaturinSettings(release=True, uv=True))
+    from rustler import Sampler
 
 
 @cache
@@ -19,7 +23,7 @@ def _load_column_index(db_name: str) -> dict:
     """
     Load the column index mapping for a dataset (cached).
     """
-    home = os.environ.get("HOME", ".")
+    home = os.environ.get("USERPROFILE", os.environ.get("HOME", "."))
     column_index_path = os.path.join(
         home, "scratch", "pre", db_name, "column_index.json"
     )
@@ -68,8 +72,9 @@ class RelationalDataset(Dataset):
             elif split == "test":
                 split = "Test"
 
+            _home = os.environ.get("USERPROFILE", os.environ.get("HOME", "."))
             table_info_path = (
-                f"{os.environ['HOME']}/scratch/pre/{db_name}/table_info.json"
+                f"{_home}/scratch/pre/{db_name}/table_info.json"
             )
             with open(table_info_path) as f:
                 table_info = json.load(f)
