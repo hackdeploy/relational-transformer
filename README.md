@@ -1,8 +1,12 @@
 # Relational Transformer
 
 This repository provides a reference implementation
-of the Relational Transformer architecture
-from the paper: [Relational Transformer: Toward Zero-Shot Foundation Models for Relational Data](https://arxiv.org/abs/2510.06377).
+for the **ICLR 2026** paper: [Relational Transformer: Toward Zero-Shot Foundation Models for Relational Data](https://arxiv.org/abs/2510.06377).
+
+**Exciting news!** Our follow-up work improves the pretraining and architecture for Relational Transformer. Please check out the [code](https://github.com/snap-stanford/plurel) for the paper [PluRel: Synthetic Data unlocks Scaling Laws for Relational Foundation Models](https://arxiv.org/abs/2602.04029).
+
+
+## Overview
 
 _🥇 Foundation Model Capabilities of Relational Transformer:_
 
@@ -145,17 +149,14 @@ pixi run torchrun --standalone --nproc_per_node=8 scripts/example_finetune.py
 
 ## Citation
 
-Please cite our paper:
+Please cite our paper as:
 
 ```bibtex
-@misc{ranjan2025relationaltransformer,
-    title={Relational Transformer: Toward Zero-Shot Foundation Models for Relational Data}, 
+@inproceedings{ranjan2025relationaltransformer,
+    title={{Relational Transformer:} Toward Zero-Shot Foundation Models for Relational Data}, 
     author={Rishabh Ranjan and Valter Hudovernik and Mark Znidar and Charilaos Kanatsoulis and Roshan Upendra and Mahmoud Mohammadi and Joe Meyer and Tom Palczewski and Carlos Guestrin and Jure Leskovec},
-    year={2025},
-    eprint={2510.06377},
-    archivePrefix={arXiv},
-    primaryClass={cs.LG},
-    url={https://arxiv.org/abs/2510.06377}, 
+    booktitle={The Fourteenth International Conference on Learning Representations},
+    year={2026}
 }
 ```
 
