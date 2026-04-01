@@ -58,6 +58,43 @@ product #7        (6 cols)  →   6 cells
 
 Default is **1024 cells**. Over many training steps, different random subsets of wide neighborhoods are sampled — the model learns from the full graph stochastically, not all at once.
 
+### Subgraphs vs. Batches
+
+A **subgraph** is the context for one prediction — one task node and its BFS neighborhood, flattened into up to 1024 cells. A **batch** is `batch_size` independent subgraphs stacked together.
+
+```
+One subgraph  =  context for ONE task node (one prediction)
+                 └── up to 1024 cells, shape: (1024,)
+
+One batch     =  batch_size=32 subgraphs stacked
+                 └── tensor shape: (32, 1024)
+```
+
+For a single forward pass with `batch_size=32`:
+- 32 different task nodes are sampled (e.g. user #42, user #99, user #301 ...)
+- Each gets its own independent BFS traversal and its own 1024-cell sequence
+- The 32 sequences are padded to the same length and stacked into `(32, 1024)`
+- Cross-batch isolation is **inherent** — every tensor is shaped `(B, S, S)`, so `b=0` and `b=1` are completely separate array slices. There is no mechanism by which a token in one subgraph can reach a token in another.
+
+**What the `pad` mask actually does** is handle *variable-length subgraphs*. A small subgraph (e.g. 200 real cells out of 1024) is zero-padded to fill the full sequence length. The sampler initializes `is_padding = True` for all positions, then sets it `False` only as BFS fills real cells in:
+
+```python
+# Shape (B, S, S): True where BOTH q and kv are real (non-padding) cells
+pad = (~is_padding[:, :, None]) & (~is_padding[:, None, :])
+```
+
+This prevents three unwanted attention patterns within a single example:
+- Real cells attending **to** padding positions
+- Padding positions attending **to** real cells  
+- Padding positions attending to each other
+
+All 4 structural masks (`feat`, `nbr`, `col`, `full`) are AND-ed with `pad` at construction time, so padding is blocked from every attention head simultaneously.
+
+This means:
+- **Loss** is computed per-cell within each subgraph, then averaged across the batch
+- **Padding** is added when a subgraph has fewer than 1024 cells (small neighborhoods) — those positions are masked out everywhere
+- **Batch size and seq_len are independent knobs** — you can have 32 examples of 1024 cells, or 64 examples of 512 cells. Memory scales with `batch_size × seq_len²` due to the `(B, S, S)` attention masks.
+
 ### 5 Semantic Types
 
 Every token has a **semantic type** that determines how it's encoded:
