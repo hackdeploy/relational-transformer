@@ -28,6 +28,7 @@ polars = "*"
 matplotlib = "*"
 relbench = "*"
 google-cloud-bigquery = "*"
+psycopg2-binary = "*"
 
 [tool.pixi.dependencies]
 rust = "*"
@@ -38,4 +39,5 @@ uv = "*"
 pre = { cmd = "python -m pyrustler.pre", description = "Preprocess a relbench dataset. Usage: pixi run pre rel-f1" }
 fly = { cmd = "python -m pyrustler.fly", description = "Benchmark the sampler. Usage: pixi run fly rel-f1" }
 convert = { cmd = "python -m pyrustler.convert_file", description = "Convert pickle files to JSON. Usage: pixi run convert ~/scratch/pre/rel-f1" }
+sqlpre = { cmd = "python -m pysqlrustler.pre", description = "Preprocess Postgres tables. Usage: pixi run sqlpre --dsn postgresql://... --config schema.json" }
 
