@@ -56,7 +56,18 @@
         "model_id": "models"
       },
       "time_col": null,
-      "sql": "SELECT l.id AS listing_id, m.id AS model_id, COALESCE(lmm.is_correct_match, false) AS label FROM listings l CROSS JOIN models m LEFT JOIN listing_model_matches lmm ON l.id = lmm.listing_id AND m.id = lmm.model_id WHERE MOD(HASHTEXT(l.id::text), 10) >= 8"
+      "sql": "SELECT l.id AS listing_id, m.id AS model_id, COALESCE(lmm.is_correct_match, false) AS label FROM listings l CROSS JOIN models m LEFT JOIN listing_model_matches lmm ON l.id = lmm.listing_id AND m.id = lmm.model_id WHERE MOD(HASHTEXT(l.id::text), 10) = 8"
+    },
+    {
+      "table_name": "listing_model_matches",
+      "table_type": "Test",
+      "primary_key": null,
+      "foreign_keys": {
+        "listing_id": "listings",
+        "model_id": "models"
+      },
+      "time_col": null,
+      "sql": "SELECT l.id AS listing_id, m.id AS model_id, COALESCE(lmm.is_correct_match, false) AS label FROM listings l CROSS JOIN models m LEFT JOIN listing_model_matches lmm ON l.id = lmm.listing_id AND m.id = lmm.model_id WHERE MOD(HASHTEXT(l.id::text), 10) = 9"
     }
   ]
 }

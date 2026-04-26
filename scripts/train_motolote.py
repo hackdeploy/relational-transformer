@@ -3,7 +3,7 @@ from rt.main import main
 if __name__ == "__main__":
     main(
         project="motolote",
-        eval_splits=["val"],
+        eval_splits=["val", "test"],
         eval_freq=500,
         eval_pow2=False,
         max_eval_steps=20,
