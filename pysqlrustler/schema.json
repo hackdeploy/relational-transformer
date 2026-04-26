@@ -45,7 +45,18 @@
         "model_id": "models"
       },
       "time_col": null,
-      "sql": "SELECT listing_id, model_id, listing_brand, listing_model, brand_name, model_name, matched_at, probability, is_correct_match::int AS label FROM listing_model_matches WHERE is_correct_match IS NOT NULL"
+      "sql": "SELECT listing_id, model_id, listing_brand, listing_model, brand_name, model_name, matched_at, probability, is_correct_match::int AS label FROM listing_model_matches WHERE is_correct_match IS NOT NULL AND MOD(HASHTEXT(listing_id::text), 10) < 8"
+    },
+    {
+      "table_name": "listing_model_matches",
+      "table_type": "Val",
+      "primary_key": null,
+      "foreign_keys": {
+        "listing_id": "listings",
+        "model_id": "models"
+      },
+      "time_col": null,
+      "sql": "SELECT listing_id, model_id, listing_brand, listing_model, brand_name, model_name, matched_at, probability, is_correct_match::int AS label FROM listing_model_matches WHERE is_correct_match IS NOT NULL AND MOD(HASHTEXT(listing_id::text), 10) >= 8"
     }
   ]
 }
