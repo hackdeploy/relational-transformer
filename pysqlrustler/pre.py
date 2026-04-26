@@ -141,6 +141,7 @@ class _Table:
         "fcol_name_to_ptable_name",
         "tcol_name",
         "node_idx_offset",
+        "pk_to_row",
     )
 
     def __init__(self) -> None:
@@ -151,6 +152,7 @@ class _Table:
         self.fcol_name_to_ptable_name: dict[str, str] = {}
         self.tcol_name: str | None = None
         self.node_idx_offset: int = 0
+        self.pk_to_row: dict = {}  # pk_value → 0-based row index
 
 
 # ---------------------------------------------------------------------------
@@ -211,6 +213,10 @@ def main(
         tbl.fcol_name_to_ptable_name = fcol_name_to_ptable_name
         tbl.tcol_name = tcol_name
         tbl.node_idx_offset = num_rows_sum
+        # Map each PK value → its 0-based row index so FK lookups work with
+        # any PK type (UUID, non-sequential int, etc.), not just 0-based ints.
+        if pcol_name and pcol_name in df.columns:
+            tbl.pk_to_row = {pk: i for i, pk in enumerate(df[pcol_name].to_list())}
 
         table_map[(table_name, table_type)] = tbl
         num_rows_sum += num_rows
@@ -359,10 +365,16 @@ def main(
                     node.node_idx = node_idx
                     node.table_name_idx = table_name_idx
 
-                    try:
-                        pnode_idx = ptable_offset + int(val)
-                    except (ValueError, TypeError):
-                        continue
+                    if ptable.pk_to_row:
+                        local_row = ptable.pk_to_row.get(val)
+                        if local_row is None:
+                            continue
+                        pnode_idx = ptable_offset + local_row
+                    else:
+                        try:
+                            pnode_idx = ptable_offset + int(val)
+                        except (ValueError, TypeError):
+                            continue
 
                     node.f2p_nbr_idxs.append(pnode_idx)
 
