@@ -12,16 +12,8 @@ if __name__ == "__main__":
         compile_=True,
         seed=0,
         # data
-        train_tasks=[("motolote", "listing_model_matches", "label", [
-            "listing_brand", "listing_model",  # drop raw text already captured by FKs
-            "brand_name", "model_name",
-            "probability",                     # drop leaky feature
-        ])],
-        eval_tasks=[("motolote", "listing_model_matches", "label", [
-            "listing_brand", "listing_model",
-            "brand_name", "model_name",
-            "probability",
-        ])],
+        train_tasks=[("motolote", "listing_model_matches", "label", [])],
+        eval_tasks=[("motolote", "listing_model_matches", "label", [])],
         batch_size=32,
         num_workers=2,
         max_bfs_width=256,
