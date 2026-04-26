@@ -22,7 +22,7 @@ if __name__ == "__main__":
         wd=0.1,
         lr_schedule=True,
         max_grad_norm=1.0,
-        max_steps=5_000,
+        max_steps=20_000,
         # model
         embedding_model="all-MiniLM-L12-v2",
         d_text=384,
