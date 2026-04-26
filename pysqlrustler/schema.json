@@ -1,0 +1,51 @@
+{
+  "db_name": "motolote",
+  "tables": [
+    {
+      "table_name": "profiles",
+      "table_type": "Db",
+      "primary_key": "id",
+      "foreign_keys": {},
+      "time_col": "updated_at",
+      "sql": null
+    },
+    {
+      "table_name": "brands",
+      "table_type": "Db",
+      "primary_key": "id",
+      "foreign_keys": {},
+      "time_col": null,
+      "sql": null
+    },
+    {
+      "table_name": "models",
+      "table_type": "Db",
+      "primary_key": "id",
+      "foreign_keys": {"brand_id": "brands"},
+      "time_col": "created_at",
+      "sql": null
+    },
+    {
+      "table_name": "listings",
+      "table_type": "Db",
+      "primary_key": "id",
+      "foreign_keys": {
+        "seller_id": "profiles",
+        "model_id": "models"
+      },
+      "time_col": "created_at",
+      "sql": "SELECT id, seller_id, model_id, title, description, price, brand, model, year, displacement_cc, mileage, engine_type, country_code, city, verification_level, is_verified, has_circulacion, has_sticker, has_seguro, seller_type, status, color, created_at, updated_at FROM listings WHERE status != 'archived'"
+    },
+    {
+      "table_name": "listing_model_matches",
+      "table_type": "Train",
+      "primary_key": null,
+      "foreign_keys": {
+        "listing_id": "listings",
+        "model_id": "models"
+      },
+      "time_col": null,
+      "sql": "SELECT listing_id, model_id, listing_brand, listing_model, brand_name, model_name, matched_at, probability, is_correct_match::int AS label FROM listing_model_matches WHERE is_correct_match IS NOT NULL"
+    }
+  ]
+}

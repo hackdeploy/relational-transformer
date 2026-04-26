@@ -73,7 +73,7 @@ from pathlib import Path
 
 import polars as pl
 
-from pyrustler.common import Edge, Node, SemType, TableType
+from .common import Edge, Node, SemType, TableType
 
 
 # ---------------------------------------------------------------------------
@@ -82,28 +82,41 @@ from pyrustler.common import Edge, Node, SemType, TableType
 
 def _load_table_postgres(dsn: str, sql: str) -> pl.DataFrame:
     """Execute *sql* against *dsn* and return a normalised Polars DataFrame."""
+    import decimal
+
     try:
         import psycopg2
-        import pandas as pd
     except ImportError as exc:
         raise ImportError(
-            "pysqlrustler requires 'psycopg2-binary' and 'pandas'.\n"
-            "Install with:  pip install psycopg2-binary pandas"
+            "pysqlrustler requires 'psycopg2-binary'.\n"
+            "Install with:  pip install psycopg2-binary"
         ) from exc
 
     with psycopg2.connect(dsn) as conn:
-        df_pd = pd.read_sql(sql, conn)
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            col_names = [desc[0] for desc in cur.description]
+            rows = cur.fetchall()
 
-    df = pl.from_pandas(df_pd)
+    if not rows:
+        return pl.DataFrame({col: pl.Series(col, [], dtype=pl.Utf8) for col in col_names})
 
-    # Normalise types to the set that the node-building loop handles.
+    # Build column-wise lists, converting Decimal → float so polars can infer types.
+    series_list = []
+    for i, col_name in enumerate(col_names):
+        values = [row[i] for row in rows]
+        if any(isinstance(v, decimal.Decimal) for v in values if v is not None):
+            values = [float(v) if v is not None else None for v in values]
+        series_list.append(pl.Series(col_name, values))
+
+    df = pl.DataFrame(series_list)
+
+    # Normalise datetime precision and integer widths.
     cast_exprs = []
     for col_name in df.columns:
         dtype = df[col_name].dtype
         if isinstance(dtype, pl.Datetime) and dtype.time_unit != "ns":
             cast_exprs.append(pl.col(col_name).dt.cast_time_unit("ns"))
-        elif isinstance(dtype, pl.Decimal):
-            cast_exprs.append(pl.col(col_name).cast(pl.Float64))
         elif dtype in (pl.Int8, pl.Int16):
             cast_exprs.append(pl.col(col_name).cast(pl.Int32))
         elif dtype in (pl.UInt8, pl.UInt16, pl.UInt64):
@@ -245,6 +258,9 @@ def main(
                 dt_sum_sq += sum(v * v for v in vals)
                 tbl.col_stats.append((0.0, 0.0))  # placeholder, filled below
 
+            elif isinstance(dtype, (pl.List, pl.Array)):
+                tbl.col_stats.append((0.0, 0.0))  # treated as text
+
             else:
                 tbl.col_stats.append((0.0, 0.0))
 
@@ -320,11 +336,17 @@ def main(
                 # Pre-cast timestamp columns to nanosecond ints for speed
                 tc_vals: list | None = None
                 if tbl.tcol_name:
-                    tc_vals = tbl.df[tbl.tcol_name].cast(pl.Int64).to_list()
+                    if tbl.tcol_name not in tbl.df.columns:
+                        print(f"    WARNING: time_col '{tbl.tcol_name}' not in '{tbl.table_name}' columns, ignoring")
+                    else:
+                        tc_vals = tbl.df[tbl.tcol_name].cast(pl.Int64).to_list()
 
                 ptc_vals: list | None = None
                 if ptable.tcol_name:
-                    ptc_vals = ptable.df[ptable.tcol_name].cast(pl.Int64).to_list()
+                    if ptable.tcol_name not in ptable.df.columns:
+                        print(f"    WARNING: time_col '{ptable.tcol_name}' not in '{ptable.table_name}' columns, ignoring")
+                    else:
+                        ptc_vals = ptable.df[ptable.tcol_name].cast(pl.Int64).to_list()
 
                 for r, val in enumerate(col.to_list()):
                     cells_done += 1
@@ -437,8 +459,10 @@ def main(
                     node.col_name_idxs.append(col_name_idx)
                     node.class_value_idx.append(-1)
 
-                elif dtype in (pl.Utf8, pl.String):
-                    text_idx = _get_text_idx(str(val))
+                elif dtype in (pl.Utf8, pl.String) or isinstance(dtype, (pl.List, pl.Array)):
+                    # Arrays/lists are serialised to a string and treated as Text.
+                    str_val = ", ".join(str(v) for v in val) if isinstance(val, list) else str(val)
+                    text_idx = _get_text_idx(str_val)
                     node.boolean_values.append(0.0)
                     node.number_values.append(0.0)
                     node.text_values.append(text_idx)
