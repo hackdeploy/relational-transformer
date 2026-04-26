@@ -385,9 +385,16 @@ def main(
 
                     ptimestamp: int | None = None
                     if ptc_vals is not None:
-                        pt_raw = ptc_vals[int(val)]
-                        if pt_raw is not None:
-                            ptimestamp = int(pt_raw // 1_000_000_000)
+                        local_row = ptable.pk_to_row.get(val) if ptable.pk_to_row else None
+                        if local_row is None:
+                            try:
+                                local_row = int(val)
+                            except (ValueError, TypeError):
+                                local_row = None
+                        if local_row is not None:
+                            pt_raw = ptc_vals[local_row]
+                            if pt_raw is not None:
+                                ptimestamp = int(pt_raw // 1_000_000_000)
 
                     node.f2p_edges.append(Edge(
                         node_idx=pnode_idx,
