@@ -175,7 +175,7 @@ def predict(
             # torch.compile() adds "_orig_mod." prefix — strip it for inference
             state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}
             net.load_state_dict(state_dict)
-            net = net.to(device).eval()
+            net = net.to(torch.bfloat16).to(device).eval()
 
             # ------------------------------------------------------------------
             # 7. Inference
