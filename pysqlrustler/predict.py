@@ -135,26 +135,20 @@ def predict(
                        for i in range(num_nodes)}
 
         # ------------------------------------------------------------------
-        # 4. Reuse text embeddings from the training run
+        # 4. Embed prediction text tokens
+        # Always re-embed: prediction data may contain new strings not in the
+        # training vocab, so copying the training text_emb.bin would be wrong.
         # ------------------------------------------------------------------
-        home = os.environ.get("USERPROFILE", os.environ.get("HOME", "."))
-        train_emb_path = (
-            Path(home) / "scratch" / "pre" / db_name
-            / f"text_emb_{embedding_model}.bin"
-        )
-        dest_emb = os.path.join(pre_dir, f"text_emb_{embedding_model}.bin")
+        import numpy as np
+        from ml_dtypes import bfloat16
+        from sentence_transformers import SentenceTransformer
 
-        if train_emb_path.exists():
-            shutil.copy(train_emb_path, dest_emb)
-        else:
-            print("text_emb not found in training dir — embedding now...")
-            import numpy as np
-            from ml_dtypes import bfloat16
-            from sentence_transformers import SentenceTransformer
-            st = SentenceTransformer(f"sentence-transformers/{embedding_model}")
-            emb = st.encode(text_vec, batch_size=512, show_progress_bar=True,
-                            convert_to_numpy=True)
-            np.stack(emb).astype(bfloat16).tofile(dest_emb)
+        dest_emb = os.path.join(pre_dir, f"text_emb_{embedding_model}.bin")
+        print(f"Embedding {len(text_vec):,} tokens for prediction...")
+        st = SentenceTransformer(f"sentence-transformers/{embedding_model}")
+        emb = st.encode(text_vec, batch_size=512, show_progress_bar=False,
+                        convert_to_numpy=True)
+        np.stack(emb).astype(bfloat16).tofile(dest_emb)
 
         # ------------------------------------------------------------------
         # 5. Point HOME at tmp so RelationalDataset finds the pre dir
