@@ -8,11 +8,15 @@ Usage:
         --listing-ids "uuid-1,uuid-2"
 """
 import argparse, os
+from pathlib import Path
 from pysqlrustler.predict import predict
 
-DSN          = "postgresql://postgres.zetsjztchfmihqfzobok:M%40satepe123@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
-CKPT         = f"{os.environ.get('HOME', '~')}/scratch/ckpts/motolote_best.pt"
-SCHEMA       = "pysqlrustler/schema.json"
+# Repo root = one level up from this script's directory
+REPO_ROOT = Path(__file__).resolve().parent.parent
+
+DSN    = "postgresql://postgres.zetsjztchfmihqfzobok:M%40satepe123@aws-1-us-east-1.pooler.supabase.com:5432/postgres"
+CKPT   = f"{os.environ.get('HOME', '~')}/scratch/ckpts/motolote_best.pt"
+SCHEMA = str(REPO_ROOT / "pysqlrustler" / "schema.json")
 
 
 def predict_for_listings(listing_ids: list[str], top_k: int = 3, out_path=None):
