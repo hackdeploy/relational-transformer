@@ -19,11 +19,11 @@ CKPT   = f"{os.environ.get('HOME', '~')}/scratch/ckpts/motolote_best.pt"
 SCHEMA = str(REPO_ROOT / "pysqlrustler" / "schema.json")
 
 
-def predict_for_listings(listing_ids: list[str], top_k: int = 3, out_path=None):
+def predict_for_listings(listing_ids: list[str], top_k: int = 3, out_path=None, ckpt_path=None):
     ids_sql = ", ".join(f"'{lid}'" for lid in listing_ids)
     return predict(
         dsn=DSN,
-        ckpt_path=CKPT,
+        ckpt_path=ckpt_path or CKPT,
         base_schema_path=SCHEMA,
         task_table="listing_model_matches",
         target_column="label",
