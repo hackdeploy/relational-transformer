@@ -177,7 +177,10 @@ def predict(
                 num_blocks=num_blocks, d_model=d_model, d_text=d_text,
                 num_heads=num_heads, d_ff=d_ff,
             )
-            net.load_state_dict(torch.load(ckpt_path, map_location="cpu"))
+            state_dict = torch.load(ckpt_path, map_location="cpu")
+            # torch.compile() adds "_orig_mod." prefix — strip it for inference
+            state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}
+            net.load_state_dict(state_dict)
             net = net.to(device).eval()
 
             # ------------------------------------------------------------------
