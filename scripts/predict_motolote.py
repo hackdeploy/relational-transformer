@@ -19,6 +19,30 @@ CKPT   = f"{os.environ.get('HOME', '~')}/scratch/ckpts/motolote_best.pt"
 SCHEMA = str(REPO_ROOT / "pysqlrustler" / "schema.json")
 
 
+def predict_for_listing_query(listing_query: str, top_k: int = 3, out_path=None, ckpt_path=None):
+    """listing_query: any SQL that returns a column of listing IDs, e.g.
+       'SELECT id FROM listings WHERE model_id IS NULL LIMIT 100'
+    """
+    return predict(
+        dsn=DSN,
+        ckpt_path=ckpt_path or CKPT,
+        base_schema_path=SCHEMA,
+        task_table="listing_model_matches",
+        target_column="is_correct_model_match",
+        foreign_keys={"listing_id": "listings", "model_id": "models"},
+        prediction_sql=(
+            f"SELECT l.id AS listing_id, m.id AS model_id, "
+            f"false::boolean AS is_correct_model_match "
+            f"FROM listings l CROSS JOIN models m "
+            f"WHERE l.id IN ({listing_query})"
+        ),
+        group_by="listing_id",
+        id_columns=["listing_id", "model_id"],
+        top_k=top_k,
+        out_path=out_path,
+    )
+
+
 def predict_for_listings(listing_ids: list[str], top_k: int = 3, out_path=None, ckpt_path=None):
     ids_sql = ", ".join(f"'{lid}'" for lid in listing_ids)
     return predict(
