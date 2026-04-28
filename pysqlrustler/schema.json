@@ -30,11 +30,10 @@
       "table_type": "Db",
       "primary_key": "id",
       "foreign_keys": {
-        "seller_id": "profiles",
-        "model_id": "models"
+        "seller_id": "profiles"
       },
       "time_col": "created_at",
-      "sql": "SELECT id, seller_id, model_id, title, description, price, brand, model, year, displacement_cc, mileage, engine_type, country_code, city, verification_level, is_verified, has_circulacion, has_sticker, has_seguro, seller_type, status, color, created_at, updated_at FROM listings WHERE status != 'archived'"
+      "sql": "SELECT id, seller_id, title, description, price, brand, model, year, displacement_cc, mileage, engine_type, country_code, city, verification_level, is_verified, has_circulacion, has_sticker, has_seguro, seller_type, status, color, created_at, updated_at FROM listings WHERE status != 'archived'"
     },
     {
       "table_name": "listing_model_matches",
