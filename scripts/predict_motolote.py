@@ -26,11 +26,11 @@ def predict_for_listings(listing_ids: list[str], top_k: int = 3, out_path=None, 
         ckpt_path=ckpt_path or CKPT,
         base_schema_path=SCHEMA,
         task_table="listing_model_matches",
-        target_column="label",
+        target_column="is_correct_model_match",
         foreign_keys={"listing_id": "listings", "model_id": "models"},
         prediction_sql=(
             f"SELECT l.id AS listing_id, m.id AS model_id, "
-            f"false::boolean AS label "
+            f"false::boolean AS is_correct_model_match "
             f"FROM listings l CROSS JOIN models m "
             f"WHERE l.id IN ({ids_sql})"
         ),

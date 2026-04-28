@@ -12,8 +12,8 @@ if __name__ == "__main__":
         compile_=True,
         seed=0,
         # data
-        train_tasks=[("motolote", "listing_model_matches", "label", [])],
-        eval_tasks=[("motolote", "listing_model_matches", "label", [])],
+        train_tasks=[("motolote", "listing_model_matches", "is_correct_model_match", [])],
+        eval_tasks=[("motolote", "listing_model_matches", "is_correct_model_match", [])],
         batch_size=32,
         num_workers=2,
         max_bfs_width=256,
