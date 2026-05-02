@@ -113,8 +113,11 @@ def predict(
             table_info = json.load(f)
         with open(os.path.join(pre_dir, "text.json")) as f:
             text_vec = json.load(f)
-        col_stats_path = os.path.join(pre_dir, "col_stats.json")
-        col_stats: dict = json.load(open(col_stats_path)) if os.path.exists(col_stats_path) else {}
+        # Read col_stats from the persistent training pre dir — the temp
+        # preprocessing has no Train split so its col_stats.json is always empty.
+        _home = os.environ.get("HOME") or os.environ.get("USERPROFILE", ".")
+        persistent_col_stats_path = os.path.join(_home, "scratch", "pre", db_name, "col_stats.json")
+        col_stats: dict = json.load(open(persistent_col_stats_path)) if os.path.exists(persistent_col_stats_path) else {}
 
         ti = table_info[f"{task_table}:Test"]
         offset    = ti["node_idx_offset"]
