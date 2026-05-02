@@ -169,6 +169,11 @@ def predict(
         os.environ["HOME"]        = fake_home
         os.environ["USERPROFILE"] = fake_home
 
+        # Clear the @cache on _load_column_index so it re-reads from the
+        # temp pre dir rather than returning a stale result from a previous call.
+        from rt.data import _load_column_index
+        _load_column_index.cache_clear()
+
         try:
             # ------------------------------------------------------------------
             # 6. Load model
@@ -234,6 +239,7 @@ def predict(
                 os.environ["HOME"] = orig_home
             if orig_userprofile is not None:
                 os.environ["USERPROFILE"] = orig_userprofile
+            _load_column_index.cache_clear()
 
     # ------------------------------------------------------------------
     # 8. Group by group_by column, rank by probability, return top-k
