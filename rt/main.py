@@ -235,6 +235,7 @@ def main(
                     "user-attendance",
                     "driver-position",
                     "ad-ctr",
+                    "listing_prices",
                 ]:
                     task_type = "reg"
                 else:
