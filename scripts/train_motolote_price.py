@@ -19,8 +19,8 @@ if __name__ == "__main__":
         max_bfs_width=256,
         # optimization
         lr=1e-4,  # fine-tuning from pretrained checkpoint
-        wd=0.1,
-        lr_schedule=True,
+        wd=0.0,
+        lr_schedule=False,
         max_grad_norm=1.0,
         max_steps=10_000,
         # model

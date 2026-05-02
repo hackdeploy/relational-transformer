@@ -366,14 +366,17 @@ def main(
 
     best_val_metrics = dict()
     best_test_metrics = dict()
+    last_eval_step = -1
 
     while steps < max_steps:
         loader.dataset.sampler.shuffle_py(int(steps / len(loader)))
         loader_iter = iter(loader)
         while steps < max_steps:
-            if (eval_freq is not None and steps % eval_freq == 0) or (
-                eval_pow2 and steps & (steps - 1) == 0
+            if steps != last_eval_step and (
+                (eval_freq is not None and steps % eval_freq == 0) or
+                (eval_pow2 and steps & (steps - 1) == 0)
             ):
+                last_eval_step = steps
                 metrics = evaluate(net)
                 if save_ckpt_dir is not None:
                     for (db_name, table_name), metric in metrics["val"].items():
