@@ -22,6 +22,9 @@ SCHEMA = str(REPO_ROOT / "pysqlrustler" / "schema.json")
 def predict_for_listing_query(listing_query: str, top_k: int = 3, out_path=None, ckpt_path=None):
     """listing_query: any SQL that returns a column of listing IDs, e.g.
        'SELECT id FROM listings WHERE model_id IS NULL LIMIT 100'
+
+    Candidates are pre-filtered to same-brand models when the listing brand
+    matches a known brand, falling back to all models when it does not.
     """
     return predict(
         dsn=DSN,
@@ -33,8 +36,14 @@ def predict_for_listing_query(listing_query: str, top_k: int = 3, out_path=None,
         prediction_sql=(
             f"SELECT l.id AS listing_id, m.id AS model_id, "
             f"false::boolean AS is_correct_model_match "
-            f"FROM listings l CROSS JOIN models m "
-            f"WHERE l.id IN ({listing_query})"
+            f"FROM listings l "
+            f"CROSS JOIN models m "
+            f"JOIN brands b ON m.brand_id = b.id "
+            f"WHERE l.id IN ({listing_query}) "
+            f"AND ("
+            f"  LOWER(b.name) = LOWER(l.brand) "
+            f"  OR NOT EXISTS (SELECT 1 FROM brands WHERE LOWER(name) = LOWER(l.brand))"
+            f")"
         ),
         group_by="listing_id",
         id_columns=["listing_id", "model_id"],
