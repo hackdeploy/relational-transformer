@@ -113,6 +113,8 @@ def predict(
             table_info = json.load(f)
         with open(os.path.join(pre_dir, "text.json")) as f:
             text_vec = json.load(f)
+        col_stats_path = os.path.join(pre_dir, "col_stats.json")
+        col_stats: dict = json.load(open(col_stats_path)) if os.path.exists(col_stats_path) else {}
 
         ti = table_info[f"{task_table}:Test"]
         offset    = ti["node_idx_offset"]
@@ -194,6 +196,14 @@ def predict(
             dataset.sampler.shuffle_py(0)
             loader = DataLoader(dataset, batch_size=None, num_workers=0)
 
+            # Fetch target column normalization stats from the Train split
+            _target_mean, _target_std = 0.0, 1.0
+            if task_table in col_stats:
+                _tbl_stats = col_stats[task_table]
+                if target_column in _tbl_stats["columns"]:
+                    _ci = _tbl_stats["columns"].index(target_column)
+                    _target_mean, _target_std = _tbl_stats["stats"][_ci]
+
             node_idx_to_score: dict[int, float] = {}
             with torch.inference_mode():
                 for batch in loader:
@@ -210,6 +220,9 @@ def predict(
                     key     = "number" if task_type == "regression" else "boolean"
                     scores  = yhat[key][is_tgt][:true_bs].flatten().float().cpu().tolist()
                     for nid, sc in zip(nidxs, scores):
+                        # Un-normalize regression scores using Train col stats
+                        if task_type == "regression":
+                            sc = sc * _target_std + _target_mean
                         node_idx_to_score[nid] = sc
 
         finally:

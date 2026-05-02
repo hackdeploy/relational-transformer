@@ -540,6 +540,20 @@ def main(
         pickle.dump(p2f_adj, f, protocol=pickle.HIGHEST_PROTOCOL)
     print(f"done in {time.time() - tic:.2f}s.")
 
+    print("writing col_stats.json ...")
+    tic = time.time()
+    col_stats_out: dict[str, dict[str, list]] = {}
+    for (tname, ttype), tbl in table_map.items():
+        if ttype == TableType.Train:
+            col_names = [c.name for c in tbl.df.get_columns()]
+            col_stats_out[tname] = {
+                "columns": col_names,
+                "stats": list(tbl.col_stats),
+            }
+    with open(pre_path / "col_stats.json", "w") as f:
+        json.dump(col_stats_out, f)
+    print(f"done in {time.time() - tic:.2f}s.")
+
     print("preprocessing complete.")
 
 

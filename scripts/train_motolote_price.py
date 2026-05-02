@@ -7,7 +7,7 @@ if __name__ == "__main__":
         eval_freq=500,
         eval_pow2=False,
         max_eval_steps=50,
-        load_ckpt_path="/content/drive/MyDrive/Colab_Data/relational-transformer-checkpoints/pretrain_rel-hm_user-churn.pt",
+        load_ckpt_path="/content/drive/MyDrive/Colab_Data/relational-transformer-checkpoints/contd-pretrain_rel-avito_ad-ctr.pt",
         save_ckpt_dir="ckpts/motolote_price",
         compile_=True,
         seed=0,
@@ -18,7 +18,7 @@ if __name__ == "__main__":
         num_workers=2,
         max_bfs_width=256,
         # optimization
-        lr=1e-4,  # fine-tuning from pretrained checkpoint
+        lr=1e-5,  # fine-tuning from pretrained checkpoint
         wd=0.0,
         lr_schedule=False,
         max_grad_norm=1.0,

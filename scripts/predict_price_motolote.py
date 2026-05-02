@@ -84,7 +84,7 @@ def predict_price_for_listing_query(
     enriched = []
     for r in results:
         lid            = r["group_value"]
-        log_price_pred = r["predictions"][0]["score"]
+        log_price_pred = r["predictions"][0]["score"]  # already un-normalized by predict()
         predicted      = math.exp(log_price_pred)
         actual         = actual_prices.get(lid)
 
