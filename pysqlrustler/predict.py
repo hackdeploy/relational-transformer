@@ -47,6 +47,7 @@ def predict(
     id_columns: list[str],
     top_k: int = 3,
     out_path: str | None = None,
+    task_type: str = "classification",  # "classification" or "regression"
     # model arch — must match checkpoint
     d_text: int = 384,
     num_blocks: int = 12,
@@ -206,7 +207,8 @@ def predict(
                     _, yhat = net(batch)
                     is_tgt  = batch["is_targets"]
                     nidxs   = batch["node_idxs"][is_tgt][:true_bs].cpu().tolist()
-                    scores  = yhat["boolean"][is_tgt][:true_bs].flatten().float().cpu().tolist()
+                    key     = "number" if task_type == "regression" else "boolean"
+                    scores  = yhat[key][is_tgt][:true_bs].flatten().float().cpu().tolist()
                     for nid, sc in zip(nidxs, scores):
                         node_idx_to_score[nid] = sc
 
@@ -221,9 +223,9 @@ def predict(
     # ------------------------------------------------------------------
     groups: dict[str, list[tuple[dict, float]]] = defaultdict(list)
     for node_idx, raw_score in node_idx_to_score.items():
-        row  = node_to_row[node_idx]
-        prob = float(torch.sigmoid(torch.tensor(raw_score)))
-        groups[row[group_by]].append((row, prob))
+        row   = node_to_row[node_idx]
+        score = raw_score if task_type == "regression" else float(torch.sigmoid(torch.tensor(raw_score)))
+        groups[row[group_by]].append((row, score))
 
     results = []
     for group_val, candidates in groups.items():
