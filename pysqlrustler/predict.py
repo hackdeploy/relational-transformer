@@ -95,7 +95,8 @@ def predict(
             "sql": prediction_sql,
         }
         db_tables = [t for t in base_schema["tables"] if t["table_type"] == "Db"]
-        temp_schema = {"db_name": db_name, "tables": db_tables + [predict_table]}
+        train_tables = [t for t in base_schema["tables"] if t["table_type"] == "Train"]
+        temp_schema = {"db_name": db_name, "tables": db_tables + train_tables + [predict_table]}
 
         temp_schema_path = os.path.join(tmp_dir, "schema_predict.json")
         with open(temp_schema_path, "w") as f:
