@@ -44,7 +44,7 @@
         "listing_id": "listings"
       },
       "time_col": null,
-      "sql": "SELECT id AS listing_id, LN(price) AS log_price FROM listings WHERE price IS NOT NULL AND price > 0 AND status != 'archived' AND MOD(HASHTEXT(id::text), 10) < 7"
+      "sql": "SELECT id AS listing_id, LN(price) AS log_price FROM listings WHERE price IS NOT NULL AND price > 0 AND status != 'archived' AND MOD(HASHTEXT(id::text), 10) < 6"
     },
     {
       "table_name": "listing_prices",
@@ -54,7 +54,7 @@
         "listing_id": "listings"
       },
       "time_col": null,
-      "sql": "SELECT id AS listing_id, LN(price) AS log_price FROM listings WHERE price IS NOT NULL AND price > 0 AND status != 'archived' AND MOD(HASHTEXT(id::text), 10) = 7"
+      "sql": "SELECT id AS listing_id, LN(price) AS log_price FROM listings WHERE price IS NOT NULL AND price > 0 AND status != 'archived' AND MOD(HASHTEXT(id::text), 10) >= 6 AND MOD(HASHTEXT(id::text), 10) < 8"
     },
     {
       "table_name": "listing_prices",
